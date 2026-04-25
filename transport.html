@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Room 01 · Transport & Mobility — TEDxNewy Salon</title>
+<title>Transport & Mobility — TEDxNewy Salon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Bruno+Ace+SC&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -185,26 +185,111 @@
   }
   .room-name .amp { color: var(--brand-light); font-weight: 400; margin: 0 4px; }
 
-  .hud {
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Timer module ------------------------------------------ */
+  .timer {
+    text-align: right;
+    z-index: 12;
+    min-width: 240px;
+  }
+  .timer-label {
     font-family: var(--mono);
     font-size: 11px;
-    letter-spacing: 0.28em;
-    text-align: right;
-    color: var(--ink-dim);
-    line-height: 1.85;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 12px;
+    display: inline-flex; align-items: center; gap: 10px;
   }
-  .hud .live {
-    display: inline-flex; align-items: center; gap: 8px;
-    color: var(--accent);
-  }
-  .hud .live::before {
-    content: ""; width: 8px; height: 8px; border-radius: 50%;
+  .timer-label::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
     background: var(--accent);
     box-shadow: 0 0 10px var(--accent);
-    animation: blink 1s step-end infinite;
+    animation: blink 1.2s step-end infinite;
   }
-  @keyframes blink { 50% { opacity: 0; } }
+  .timer.idle .timer-label::before { animation: none; opacity: 0.5; }
+  .timer-display {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 64px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 24px rgba(255,255,255,0.18);
+    transition: color 0.3s, text-shadow 0.3s;
+    margin-bottom: 16px;
+  }
+  .timer.warning .timer-display {
+    color: #ffd23f;
+    text-shadow: 0 0 24px rgba(255, 210, 63, 0.6);
+  }
+  .timer.critical .timer-display {
+    color: #ff5566;
+    text-shadow: 0 0 24px rgba(255, 85, 102, 0.85);
+    animation: critPulse 0.85s ease-in-out infinite;
+  }
+  .timer.done .timer-display {
+    color: #ff5566;
+    font-size: 40px;
+    text-shadow: 0 0 24px rgba(255, 85, 102, 0.95), 0 0 60px rgba(235, 0, 40, 0.6);
+    animation: critPulse 1s ease-in-out infinite;
+    letter-spacing: 0.16em;
+  }
+  @keyframes critPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.78; transform: scale(1.025); }
+  }
+  .timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .timer-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.08s, filter 0.18s;
+    outline: none;
+  }
+  .timer-btn:hover {
+    background: rgba(0, 231, 255, 0.12);
+    box-shadow: 0 0 14px rgba(0, 231, 255, 0.5);
+  }
+  .timer-btn:active { transform: translateY(1px); }
+  .timer-btn.primary {
+    background: var(--accent);
+    color: var(--bg-0);
+    font-weight: 700;
+    box-shadow: 0 0 14px rgba(0, 231, 255, 0.45);
+  }
+  .timer-btn.primary:hover {
+    filter: brightness(1.12);
+    box-shadow: 0 0 22px rgba(0, 231, 255, 0.75);
+  }
+
+  /* Time-up flash ---------------------------------------- */
+  body.time-up::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    box-shadow:
+      inset 0 0 0 4px rgba(255, 85, 102, 0.85),
+      inset 0 0 120px rgba(255, 51, 68, 0.35);
+    animation: doneBorder 1.1s ease-in-out infinite;
+  }
+  @keyframes doneBorder {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
 
   /* Hero --------------------------------------------------- */
   main.hero {
@@ -521,14 +606,17 @@
     <div class="brand">
       <img src="https://tedxnewy.salon/logo-white.png" alt="TEDxNewy" />
       <div class="room-ident">
-        <div class="room-num">Room 01 · Salon 2050</div>
+        <div class="room-num">TEDxNewy Salon · 2050</div>
         <div class="room-name">Transport <span class="amp">&amp;</span> Mobility</div>
       </div>
     </div>
-    <div class="hud">
-      <div class="live">SIGNAL · LIVE</div>
-      <div id="clock">00:00:00</div>
-      <div>NETWORK · <span id="netStatus">OPTIMAL</span></div>
+    <div class="timer idle" id="timer">
+      <div class="timer-label">Discussion Timer</div>
+      <div class="timer-display" id="td">20:00</div>
+      <div class="timer-controls">
+        <button class="timer-btn primary" id="btnStart" type="button">▶ Start</button>
+        <button class="timer-btn" id="btnReset" type="button">⟲ Reset</button>
+      </div>
     </div>
   </header>
 
@@ -590,7 +678,7 @@
     <span class="qr-corner bl"></span>
     <span class="qr-corner br"></span>
     <div class="qr-inner">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.menti.com%2FREPLACE-WITH-TRANSPORT-CODE&format=svg&qzone=2&color=030714&bgcolor=f5f7fa" alt="Scan to respond on Mentimeter" />
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https%3A%2F%2Fwww.menti.com%2Falroarp7eg8s&format=svg&qzone=2&color=030714&bgcolor=f5f7fa" alt="Scan to respond on Mentimeter" />
     </div>
     <div class="qr-cta">
       <div class="big">Scan · Respond</div>
@@ -603,11 +691,10 @@
     <div class="when">
       Salon Date
       <strong>April 30, 2026</strong>
-      <div class="coords">SESSION 01 // 19:00 AEST</div>
     </div>
     <div class="where">
       Newcastle · NSW
-      <strong>Room 01 — Transport</strong>
+      <strong>Transport &amp; Mobility</strong>
       <div class="coords">−32.9283° // +151.7817°</div>
     </div>
   </footer>
@@ -765,18 +852,87 @@
   });
 })();
 
-/* HUD clock ------------------------------------------------ */
-(function hud() {
-  const clock = document.getElementById('clock');
-  const status = document.getElementById('netStatus');
-  const states = ['OPTIMAL', 'NOMINAL', 'OPTIMAL', 'OPTIMAL', 'STREAMING'];
-  let s = 0;
-  function pad(n) { return String(n).padStart(2, '0'); }
-  setInterval(() => {
-    const d = new Date();
-    clock.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-  }, 1000);
-  setInterval(() => { s = (s + 1) % states.length; status.textContent = states[s]; }, 4200);
+/* Discussion timer ---------------------------------------- */
+(function timer() {
+  const DURATION = 20 * 60;       // 20 minutes
+  const WARN = 5 * 60;            // amber under 5 min
+  const CRIT = 60;                // red pulse under 1 min
+  const td = document.getElementById('td');
+  const btnStart = document.getElementById('btnStart');
+  const btnReset = document.getElementById('btnReset');
+  const t = document.getElementById('timer');
+
+  let remaining = DURATION;
+  let intervalId = null;
+  let state = 'idle';   // idle | running | paused | done
+
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = s => pad(Math.floor(s / 60)) + ':' + pad(s % 60);
+
+  function render() {
+    t.classList.remove('idle', 'running', 'paused', 'done', 'warning', 'critical');
+    t.classList.add(state);
+    if (state !== 'done') {
+      td.textContent = fmt(remaining);
+      if (state === 'running' || state === 'paused') {
+        if (remaining <= CRIT) t.classList.add('critical');
+        else if (remaining <= WARN) t.classList.add('warning');
+      }
+    } else {
+      td.textContent = "TIME'S UP";
+    }
+    if (state === 'idle')        btnStart.textContent = '▶ Start';
+    else if (state === 'running') btnStart.textContent = '⏸ Pause';
+    else if (state === 'paused')  btnStart.textContent = '▶ Resume';
+    else if (state === 'done')    btnStart.textContent = '⟲ Reset';
+  }
+
+  function start() {
+    state = 'running';
+    intervalId = setInterval(tick, 1000);
+    render();
+  }
+  function pause() {
+    state = 'paused';
+    clearInterval(intervalId);
+    render();
+  }
+  function reset() {
+    clearInterval(intervalId);
+    remaining = DURATION;
+    state = 'idle';
+    document.body.classList.remove('time-up');
+    render();
+  }
+  function tick() {
+    remaining--;
+    if (remaining <= 0) {
+      remaining = 0;
+      clearInterval(intervalId);
+      state = 'done';
+      document.body.classList.add('time-up');
+    }
+    render();
+  }
+
+  btnStart.addEventListener('click', () => {
+    if (state === 'idle' || state === 'paused') start();
+    else if (state === 'running') pause();
+    else if (state === 'done') reset();
+  });
+  btnReset.addEventListener('click', reset);
+
+  // Spacebar shortcut: toggle start/pause
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      btnStart.click();
+    } else if (e.code === 'KeyR') {
+      reset();
+    }
+  });
+
+  render();
 })();
 
 /* Cursor --------------------------------------------------- */
