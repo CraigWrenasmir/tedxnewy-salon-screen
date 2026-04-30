@@ -355,33 +355,6 @@
     to { opacity: 1; transform: none; }
   }
 
-  .tonight {
-    position: relative;
-    display: inline-block;
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(22px, 2.4vw, 38px);
-    letter-spacing: 0.7em;
-    text-indent: 0.7em;
-    text-transform: uppercase;
-    color: var(--ink);
-    padding: 16px 56px;
-    margin-top: 4px;
-    opacity: 0;
-    animation: fadeUp 1s 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  }
-  .tonight::before, .tonight::after {
-    content: "";
-    position: absolute; top: 50%;
-    width: clamp(60px, 12vw, 180px); height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
-  }
-  .tonight::before { right: 100%; transform: translateX(-12px); }
-  .tonight::after {
-    left: 100%; transform: translateX(12px);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), transparent);
-  }
-
   /* Three room preview strip ------------------------------ */
   .rooms {
     position: absolute;
@@ -622,8 +595,6 @@
       <span class="word what">What</span>
       <span class="word if">If</span><span class="word qmark">?</span>
     </h1>
-
-    <div class="tonight">Tonight</div>
   </main>
 
   <!-- Three room preview strip -->
